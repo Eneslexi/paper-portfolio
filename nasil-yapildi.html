@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paper Portfolio nasıl yapıldı? El hareketiyle video kontrolü rehberi</title>
+<meta name="description" content="Webcam üzerinden el takibiyle videoyu avuç açıp kapatarak kontrol eden kağıt estetikli portfolyo sayfası adım adım nasıl kurulur: MediaPipe, video scrubbing ve yapay zekaya yaptırma formülü." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" />
+<style>
+  :root{
+    --paper:#f5efe2; --paper-deep:#ede4d0; --ink:#211e19; --pencil:#8a8375;
+    --pen-blue:#2b4590; --blush:#e7b7a4; --frame:#fffdf7;
+    --display:"Fraunces",serif; --body:"Inter",sans-serif; --mono:"Space Mono",monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--body);color:var(--ink);background:var(--paper);line-height:1.75;position:relative}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.55;z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 22px}
+  .mono{font-family:var(--mono)}
+
+  header{padding:72px 0 44px;text-align:center}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:lowercase;color:var(--pencil)}
+  h1{font-family:var(--display);font-weight:500;font-size:clamp(34px,6vw,58px);line-height:1.1;margin-top:16px}
+  h1 em{font-style:italic;color:var(--pen-blue)}
+  .lead{max-width:560px;margin:20px auto 0;color:#4c463c;font-size:17px}
+  .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:14px;color:var(--ink);
+    background:var(--frame);border:1.5px solid var(--ink);border-radius:4px;padding:11px 20px;text-decoration:none;
+    box-shadow:3px 3px 0 var(--blush);transition:transform .2s,box-shadow .2s}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--blush)}
+  .btn.blue{box-shadow:3px 3px 0 #b9c6ec}
+  .btn.blue:hover{box-shadow:5px 5px 0 #b9c6ec}
+
+  main{padding:30px 0 20px}
+  section{background:var(--frame);border:1.5px solid var(--ink);border-radius:6px;padding:34px 34px 30px;margin-bottom:34px;
+    position:relative;box-shadow:4px 4px 0 rgba(33,30,25,.12)}
+  section::before{content:"";position:absolute;top:-12px;left:26px;width:78px;height:22px;background:rgba(231,183,164,.6);
+    transform:rotate(-2deg);border-radius:2px}
+  .num{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--pen-blue)}
+  h2{font-family:var(--display);font-weight:500;font-size:27px;margin:8px 0 14px}
+  p{color:#4c463c;margin-bottom:13px;font-size:15.5px}
+  p strong,li strong{color:var(--ink)}
+  ul{color:#4c463c;padding-left:22px;margin-bottom:13px;font-size:15.5px}
+  li{margin-bottom:7px}
+  pre{background:#26231d;color:#efe9da;border-radius:6px;padding:16px 18px;overflow-x:auto;margin:16px 0;font-size:12.5px;line-height:1.65}
+  code{font-family:var(--mono)}
+  p code,li code{background:var(--paper-deep);border:1px solid #d8cdb4;border-radius:4px;padding:1px 6px;font-size:13px}
+  .not{background:var(--paper-deep);border:1.5px dashed var(--pencil);border-radius:6px;padding:14px 18px;margin:16px 0;font-size:14.5px;color:#4c463c}
+  .not b{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--pen-blue);display:block;margin-bottom:5px}
+
+  footer{text-align:center;padding:30px 0 70px;color:var(--pencil);font-size:14px}
+  footer a{color:var(--pen-blue)}
+  @media(max-width:600px){section{padding:26px 20px 22px}}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <p class="eyebrow">perde arkası · el işi ama dijital</p>
+  <h1>Bu sayfa elini <em>kameradan okuyor.</em></h1>
+  <p class="lead">Avucunu açtıkça video ilerliyor, yumruk yaptıkça geri sarıyor. Kod açık, tarif burada. Aynısını sen de kurabilirsin, üstelik kod yazmadan.</p>
+  <div class="btns">
+    <a class="btn" href="./">← Deneyime dön</a>
+    <a class="btn blue" href="https://github.com/Eneslexi/paper-portfolio" target="_blank" rel="noopener">Açık kaynak kod ⌁</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <span class="num mono">01 · fikir</span>
+    <h2>Dokunmadan kontrol</h2>
+    <p>Sayfanın numarası şu: sağdaki video kendi kendine oynamıyor, <strong>senin elinle</strong> oynuyor. Tarayıcı kameradan elini izliyor, avucunun ne kadar açık olduğunu ölçüyor ve bu değeri videonun zaman çizgisine bağlıyor. Yumruk videonun başı, açık avuç videonun sonu.</p>
+    <ul>
+      <li><strong>MediaPipe HandLandmarker:</strong> Google'ın tarayıcıda çalışan el takip modeli. Kurulum yok, CDN'den geliyor.</li>
+      <li><strong>Düz HTML + CSS + JS:</strong> framework yok, derleme yok. Üç dosya.</li>
+      <li><strong>Kağıt estetiği:</strong> buruşuk kağıt dokusu, bant parçaları ve el yazısı hissi tamamen CSS ile.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num mono">02 · el takibi</span>
+    <h2>Avuç ne kadar açık?</h2>
+    <p>Model her karede elin 21 noktasını veriyor. Parmak uçlarının bileğe olan ortalama uzaklığını avuç boyutuna bölünce 0 ile 1 arasında bir "açıklık" değeri çıkıyor. Titremesin diye değer yumuşatılıyor (EMA) ve herkesin eline uysun diye aralık çalışırken kendini kalibre ediyor:</p>
+    <pre><code>const openness = mean(tipToWrist) / palmSize;   // yumruk ~1.25, acik avuc ~1.95
+smoothed += ALPHA * (openness - smoothed);      // titreme onleyici yumusatma
+video.currentTime = smoothed * video.duration;  // el = zaman cizgisi</code></pre>
+    <p>Kamera istemeyenler için klavye de çalışıyor: ok tuşları videoyu adım adım sarıyor.</p>
+  </section>
+
+  <section>
+    <span class="num mono">03 · video</span>
+    <h2>Yine aynı altın kural</h2>
+    <p>Video bir zaman çizgisi gibi sürekli ileri geri sarıldığı için sık keyframe şart. Normal mp4'te keyframe birkaç saniyede bir gelir ve her sarma işlemi takılır. Çözüm, her kareyi keyframe yapmak:</p>
+    <pre><code>ffmpeg -i kaynak.mp4 -c:v libx264 -g 1 -crf 21 -preset fast \
+  -pix_fmt yuv420p -an -movflags +faststart assets/me.mp4</code></pre>
+    <div class="not"><b>Not</b>Bu 6 saniyelik video her kare keyframe olmasına rağmen 19MB. Kısa videolarda bu tarifin maliyeti yok denecek kadar az, akıcılık farkı ise gece gündüz.</div>
+  </section>
+
+  <section>
+    <span class="num mono">04 · yapay zekaya yaptır</span>
+    <h2>Kod yazmadan aynısı</h2>
+    <p>Bu sayfayı ben kod yazarak değil, yapay zekayı yönlendirerek kurdum. İşe yarayan komutlar şunlardı:</p>
+    <ul>
+      <li>"Kağıt dokulu, el işi hissi veren bir portfolyo sayfası istiyorum."</li>
+      <li>"Sağda bir video olsun ama kendi kendine oynamasın. Kameradan elimi izle, avucumu açtıkça video ilerlesin, yumruk yapınca geri sarsın."</li>
+      <li>"Kamerası olmayanlar için klavyeyle de çalışsın."</li>
+      <li>"Video sarma takılıyor, akıcı yap." (Keyframe çözümünü kendisi buldu.)</li>
+      <li>"Canlıya al."</li>
+    </ul>
+    <p>Genel formülün tamamı ayrı bir rehberde: <a href="https://enesayd.in/rehber/">Yapay zekaya site yaptırma, 10 adım</a>.</p>
+  </section>
+
+  <section>
+    <span class="num mono">05 · kendin kur</span>
+    <h2>Üç dosya, bir video</h2>
+    <pre><code>git clone https://github.com/Eneslexi/paper-portfolio.git
+cd paper-portfolio
+# videoyu 03. adimdaki gibi encode edip assets/me.mp4 olarak koy
+python3 -m http.server 8000   # ya da herhangi bir statik sunucu</code></pre>
+    <p>Önemli: kamera izni sadece <code>localhost</code> ve <code>https</code> adreslerde çalışır. Canlıya alırken SSL'li bir sunucu kullan. Derleme adımı yok, dosyaları at ve çalışsın.</p>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>Kod: <a href="https://github.com/Eneslexi/paper-portfolio" target="_blank" rel="noopener">github.com/Eneslexi/paper-portfolio</a> · Orijinal tasarım: <a href="https://github.com/divyashrma18/paper-portfolio" target="_blank" rel="noopener">divyashrma18</a> · Uyarlama: <a href="https://enesayd.in">Enes Aydın</a></p>
+</footer>
+
+</body>
+</html>
